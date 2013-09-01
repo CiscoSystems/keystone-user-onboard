@@ -1,0 +1,9 @@
+
+    export OS_NO_CACHE=true
+    export OS_TENANT_NAME=admin
+    export OS_USERNAME=admin
+    export OS_PASSWORD='Cisco123'
+    export OS_AUTH_URL="http://172.29.75.198:5000/v2.0/"
+    export OS_AUTH_STRATEGY=keystone
+    export OS_REGION_NAME=RegionOne
+    

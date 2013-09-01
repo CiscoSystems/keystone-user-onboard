@@ -1,0 +1,91 @@
+SAVE THIS DOCUMENT!!!!
+Hi %FIRST_NAME% %LAST_NAME%,
+ 
+welcome to your new OpenStack account and the amazing world of cloud.
+ 
+In order to use your shiny new environment, you can either manage your
+environment via the slick web based user interface available here:
+ 
+   http://%HORIZON_FQDN%
+
+Credentials are:
+ 
+Username: %USER_NAME%
+Password: %PASSWORD%
+ 
+Openstack credentials are available here:
+
+   http://%HORIZON_FQDN%/horizon/project/access_and_security/api_access/openrc/
+
+EC2 credentials are available here:
+
+   http://%HORIZON_FQDN%/horizon/project/access_and_security/api_access/ec2/
+ 
+Additional information is available here:
+
+   http://docs.openstack.org
+
+Before you do anything else, please change your password as follows:
+
+- create an RC file
+
+cat > openrc <<EOF
+export OS_TENANT_NAME=%USER_NAME%
+export OS_USERNAME=%USER_NAME%
+export OS_PASSWORD=%PASSWORD%
+export OS_AUTH_URL="%HORIZON_FQDN%:5000/v2.0/"
+export OS_AUTH_STRATEGY=keystone
+EOF
+
+- source your RC File
+
+source openrc
+
+- install the python keystone client:
+sudo easy_install python-keystoneclient
+
+- change your password:
+
+keystone keystone password-update --current-password %PASSWORD% --new-password YOUR_NEW_PASSWORD
+
+You may want to install the other key OpenStack cli tools as well:
+
+sudo easy_install python-novaclient
+sudo easy_install python-glanceclient
+sudo easy_install python-cinderclient
+sudo easy_install python-swiftclient
+sudo easy_install python-neutronclient
+
+Once you have the tools installed, you can go about setting up your first VM.
+
+1. Install an ssh public key into your tenant (if you don't have one, ssh-keygen -t rsa -N ''):
+
+nova --no-cache keypair-add --pub_key ~/.ssh/id_rsa.pub %USER_NAME%
+
+2. Set your default security-group rules to allow ping, ssh, and port 80 traffic:
+
+quantum security-group-rule-create --protocol icmp --direction ingress default
+quantum security-group-rule-create --protocol tcp --port-range-min 22 \ 
+  --port-range-max 22 --direction ingress default
+quantum security-group-rule-create --protocol tcp --port-range-min 80 \ 
+  --port-range-max 80 --direction ingress default
+
+3. Create a cloud-init file (we'll just set a password for the ubuntu user):
+
+cat > user-script.txt <<EOS
+#!/bin/bash
+passwd ubuntu <<EOF
+ubuntu
+ubuntu
+EOF
+EOS
+
+4. Spin up your VM!
+
+nova --no-cache boot --flavor 1 --image ubuntu --key_name %USER_NAME% \
+  --user-data user-script.txt  %USER_NAME%-vm
+
+ 
+Thanks,
+Your friendly neighborhood OpenStack support team!
+%SUPPORT_ADDRESS%
